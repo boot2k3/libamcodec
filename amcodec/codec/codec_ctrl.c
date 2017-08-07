@@ -307,7 +307,6 @@ static inline int codec_video_es_init(codec_para_t *pcodec)
       handle = codec_h_open(CODEC_VIDEO_ES_HEVC_DEVICE, flags);
     } else if (pcodec->video_type == VFORMAT_SWCODEC) {
         printf("OPEN es swcodec\n");
-		codec_sw_decoder_init(pcodec);
     } else {
         CODEC_PRINT("OPEN es DEVICE\n");
         handle = codec_h_open(CODEC_VIDEO_ES_DEVICE, flags);
@@ -813,7 +812,7 @@ int codec_write_swcodec(codec_para_t *pcodec, AVPacket *avpkt)
 {
     int ret;
 
-	ret = codec_sw_decoder_write(pcodec, avpkt);
+	ret = 0;
 
     if(CODEC_ERROR_NONE == ret)
         return avpkt->size;
@@ -852,8 +851,7 @@ int codec_close(codec_para_t *pcodec)
 	CODEC_PRINT("[%s %d]\n", __FUNCTION__, __LINE__);
 	
     if (pcodec->video_type == VFORMAT_SWCODEC) {
-        codec_sw_decoder_release(pcodec);
-        return 0;
+        return -1;
     }
 
     if (pcodec->has_audio) {
@@ -978,8 +976,6 @@ int codec_checkin_pts(codec_para_t *pcodec, unsigned long pts)
 int codec_checkin_video_ratio(float ratio)
 {
     CODEC_PRINT("[%s:%d]ratio:%f\n",__FUNCTION__,__LINE__, ratio);
-
-	codec_sw_decoder_set_ratio(ratio);
 
     return -1;
 }
@@ -1815,8 +1811,7 @@ int codec_get_vpts(codec_para_t *pcodec)
     }
 	
 	if (pcodec->video_type == VFORMAT_SWCODEC) {
-		codec_sw_decoder_getvpts(pcodec, &vpts);
-        return 0;
+        return -1;
 	}
 
     ret = codec_h_ioctl(pcodec->handle, AMSTREAM_IOC_GET, AMSTREAM_GET_VPTS, (unsigned long)&vpts);
@@ -1848,8 +1843,7 @@ int codec_get_pcrscr(codec_para_t *pcodec)
     }
 	
 	if (pcodec->video_type == VFORMAT_SWCODEC) {
-		codec_sw_decoder_getpcr(pcodec, (unsigned long)&pcrscr);
-        return 0;
+        return -1;
 	}
 
     ret = codec_h_ioctl(pcodec->handle, AMSTREAM_IOC_GET, AMSTREAM_GET_PCRSCR, (unsigned long)&pcrscr);
